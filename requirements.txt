@@ -4,8 +4,6 @@ cachetools==5.2.0
 certifi==2022.6.15
 charset-normalizer==2.1.0
 cloudpickle==2.1.0
-# Editable Git install with no remote (custom-gym-traffic==0.1)
--e /home/bishal/Programming/reinforcement-learning/custom_gym
 cycler==0.11.0
 fonttools==4.34.4
 future==0.18.2
