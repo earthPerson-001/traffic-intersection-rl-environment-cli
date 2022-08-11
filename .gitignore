@@ -163,3 +163,8 @@ cython_debug/
 bin/
 pyvenv.cfg
 custom_gym/buil
+
+logs/*
+models/*
+
+.vscode
