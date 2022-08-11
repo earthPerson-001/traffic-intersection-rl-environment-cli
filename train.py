@@ -10,17 +10,15 @@ import gym
 
 env = gym.make('TrafficIntersectionEnvDoubleLane-v1')
 
-# stable_baselines3.common.env_checker.check_env(env, warn=True, skip_render_check=True)
+stable_baselines3.common.env_checker.check_env(env, warn=True, skip_render_check=True)
 
-model = PPO("MlpPolicy", env, verbose=1, tensorboard_log="../logs/ppo-trafficintersection/")
+# model = PPO("MlpPolicy", env, verbose=1, tensorboard_log="./logs/ppo-trafficintersection/")
+
+model = PPO.load("./models/TrafficIntersection-DoubleLane-ppo", env=env)
 
 model.learn(total_timesteps=200000)
 
-model.save("../models/TrafficIntersection-DoubleLane-ppo")
-
-
-# model = PPO.load("../models/TrafficIntersection-singleLane-ppo", env=env)
-
+model.save("./models/TrafficIntersection-DoubleLane-ppo")
 
 for i in range(3):
     obs = env.reset()
