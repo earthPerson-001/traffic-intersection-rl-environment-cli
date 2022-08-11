@@ -1,1 +1,2 @@
-from envs.custom_env_dir.TrafficIntersectionEnv import TrafficIntersectionEnv
+from envs.custom_env_dir.TrafficIntersectionEnvDoubleLane import TrafficIntersectionEnvDoubleLane
+from envs.custom_env_dir.TrafficIntersectionEnvSingleLane import TrafficIntersectionEnvSingleLane
