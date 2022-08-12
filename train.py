@@ -1,4 +1,4 @@
-from multiprocessing import popen_fork
+from datetime import date, datetime
 from stable_baselines3 import PPO
 from stable_baselines3 import A2C
 import stable_baselines3.common.env_checker
@@ -7,18 +7,26 @@ from custom_gym.envs.custom_env_dir import TrafficIntersectionEnvDoubleLane
 from stable_baselines3.common.vec_env import DummyVecEnv
 import gym
 
+startTime = datetime.now()
 
-env = gym.make('TrafficIntersectionEnvDoubleLane-v1')
+env = gym.make('TrafficIntersectionEnvSingleLane-v1')
 
-stable_baselines3.common.env_checker.check_env(env, warn=True, skip_render_check=True)
+# stable_baselines3.common.env_checker.check_env(env, warn=True, skip_render_check=True)
 
-# model = PPO("MlpPolicy", env, verbose=1, tensorboard_log="./logs/ppo-trafficintersection/")
+modelType = "ppo"
+model = PPO("MlpPolicy", env, verbose=1, tensorboard_log="./logs/{}-trafficintersection/".format(modelType))
 
-model = PPO.load("./models/TrafficIntersection-DoubleLane-ppo", env=env)
+# model = PPO.load("./models/2022-08-12 22:31:22.631886-TrafficIntersection-DoubleLane-{}-1140000".format(modelType), env=env)
 
-model.learn(total_timesteps=200000)
 
-model.save("./models/TrafficIntersection-DoubleLane-ppo")
+TIMESTEP=10000
+count = 1
+while count < 30:
+    model.learn(total_timesteps=TIMESTEP, reset_num_timesteps=False, tb_log_name=f"{modelType}-{startTime}")
+    model.save("./models/{}-TrafficIntersection-SingleLane-{}-{}".format(startTime, modelType, count * TIMESTEP))
+    count += 1
+
+
 
 for i in range(3):
     obs = env.reset()
