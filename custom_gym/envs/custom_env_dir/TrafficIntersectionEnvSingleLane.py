@@ -23,7 +23,7 @@ this is the average speed each vehicle will take when passing (assuming ideal ca
 '''
 VEHICLE_SPEED_OF_LANES = [14, 13, 15, 8]  
 
-MIN_GREEN_TIME = 30   # This corresponds to minimum green light time (in seconds) which is equivalent to one step in our environment
+MIN_GREEN_TIME = 60   # This corresponds to minimum green light time (in seconds) which is equivalent to one step in our environment
 
 ''' 
 The possible configuration in 4 way, two lanes intersection is 4 
@@ -154,22 +154,10 @@ class TrafficIntersectionEnvSingleLane(gym.Env):
         # keeping track of the reward
         # self.collected_reward = -1
 
-
-        # initialising our environment
-
-        # each element of array corresponds to vehicle count in the corresponding lane
         self.lanes = numpy.zeros(int(NUMBER_OF_LANES_TO_OBSERVE))
 
-        # randomising vehicle count in lanes
-        for i in range(int(NUMBER_OF_LANES_TO_OBSERVE)):
-            self.lanes[i] = random.randint(int(0.1 * LANES_CAPACITY[i]), LANES_CAPACITY[i])
-
-        self.state = self.lanes
-
-        self.percentageOfVehiclePassingThroughTheIntersectionLastTime = 0
-
-
-        self.remaining_time = ONE_TRAINING_TIME
+        # initializing our environment
+        self.reset()
 
         
     def step(self, action):
@@ -183,17 +171,19 @@ class TrafficIntersectionEnvSingleLane(gym.Env):
 
         self.remaining_time -= MIN_GREEN_TIME
 
-        self.state = action
+        # copying the observation to use for reward generation. since, observation will be changed after traffic is simulated
+        last_observation_leading_to_predicted_action = self.state.copy()
 
-        vehicleThroughIntersection, vehicleRemaining = self.simulateTraffic()
+        vehicleThroughIntersection, vehicleRemaining = self.simulateTraffic(action)
 
         if vehicleThroughIntersection==0 or self.remaining_time < MIN_GREEN_TIME:
             done = True
         
-        reward = self.calculateReward(vehicleThroughIntersection, vehicleRemaining)
+        reward = self.calculateReward(vehicleThroughIntersection, vehicleRemaining, last_observation_leading_to_predicted_action)
         #self.collected_reward += reward
 
         obs = self.lanes
+        self.state = self.lanes
 
         if done==True:
             self.reset()
@@ -216,9 +206,9 @@ class TrafficIntersectionEnvSingleLane(gym.Env):
 
         return self.state
 
-    def simulateTraffic(self):
+    def simulateTraffic(self, action):
 
-        trafficLightConfiguration = self.state
+        trafficLightConfiguration = action
         vehicleThroughIntersection = 0
         totalVehicle = reduce(lambda x,y: x+y, self.lanes)
 
@@ -256,13 +246,8 @@ class TrafficIntersectionEnvSingleLane(gym.Env):
 
     # dummy reward function for now
     # this doesn't work
-    def calculateReward(self, numberOfVehiclePassed, numberOfVehicleRemaining):
+    def calculateReward(self, numberOfVehiclePassed, numberOfVehicleRemaining, last_observation_leading_to_predicted_action):
 
-        # previous observation to see what was the best possible choice
-        previousObservation = self.lanes.copy()
-        for j,probability in enumerate(PROBABILITY_OF_VEHICLE_OCCURANCE_IN_LANES_PER_SECOND):
-            previousObservation[j] -= int(probability * MIN_GREEN_TIME)
-
-        reward = numberOfVehiclePassed / max(previousObservation)
+        reward = numberOfVehiclePassed / max(last_observation_leading_to_predicted_action)
 
         return reward
