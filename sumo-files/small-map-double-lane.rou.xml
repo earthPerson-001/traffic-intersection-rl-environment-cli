@@ -1,0 +1,65 @@
+<routes>
+    <vType id="car"
+   			vClass="passenger" length="5" accel="3.5" decel="2.2"
+   			sigma="1.0" maxSpeed="10"/>
+    
+    <vType id="car-EW"
+   			vClass="passenger" length="5" accel="3.5" decel="2.2"
+   			sigma="1.0" maxSpeed="10"/>
+
+    <vType id="motorcycle"
+   			vClass="motorcycle" length="3" accel="3.8" decel="2.5" guiShape="motorcycle"
+   			sigma="1.0" maxSpeed="10"/>
+
+    <vType id="motorcycle-EW"
+   			vClass="motorcycle" length="3" accel="3.8" decel="2.5" guiShape="motorcycle"
+   			sigma="1.0" maxSpeed="10"/>
+    
+    <vType id="truck"
+   			vClass="truck" length="6" accel="2.5" decel="2.2" guiShape="truck"
+   			sigma="1.0" maxSpeed="7"/>
+    
+    <vType id="truck-EW"
+   			vClass="truck" length="6" accel="2.5" decel="2.2" guiShape="truck"
+   			sigma="1.0" maxSpeed="7"/>
+
+   <vType id="ev"
+      		vClass="emergency" length="7" accel="5.5" decel="2.2" sigma="1.0"
+      		maxSpeed="20" guiShape="emergency" speedFactor="2.0"
+      		minGapLat="0.2"/>
+    
+    <vType id="ev-EW"
+      		vClass="emergency" length="7" accel="5.5" decel="2.2" sigma="1.0"
+      		maxSpeed="20" guiShape="emergency" speedFactor="2.0"
+      		minGapLat="0.2"/>
+    
+    <vType id="bus"
+   			vClass="bus" length="8" accel="3.5" decel="2.2" guiShape="bus"
+   			sigma="1.0" maxSpeed="9"/>
+    
+    <vType id="bus-EW"
+   			vClass="bus" length="8" accel="3.5" decel="2.2" guiShape="bus"
+   			sigma="1.0" maxSpeed="9"/>
+
+    <interval begin="0" end="5000">
+        <!-- Originating from left-->
+        <flow id="car" departLane="0" from="E9" to="E8" number="1000"/>
+        <flow id="truck" from="E9" to="E10" number="580"/>
+        <flow id="bus" departLane="1" from="E9" to="E11" number="700"/>
+
+        <!-- Originating from up-->
+        <flow id="ev" from="-E8" departLane="1" to="-E9" number="850"/>
+        <flow id="motorcycle" from="-E8" to="E11" number="900"/>
+        <flow id="motorcycle-EW" departLane="0" from="-E8" to="E10" number="900"/>
+
+        <!-- Originating from right-->
+        <flow id="car-EW" from="-E10" to="-E9" number="1000"/>
+        <flow id="truck-EW" departLane="1" from="-E10" to="E8" number="580"/>
+        <flow id="bus-EW" departLane="0" from="-E10" to="E11" number="700"/>
+
+        <!-- Originatin from down-->
+        <flow id="ev-EW" departLane="0" from="-E11" to="-E9" number="850"/>
+    </interval>
+
+
+</routes>

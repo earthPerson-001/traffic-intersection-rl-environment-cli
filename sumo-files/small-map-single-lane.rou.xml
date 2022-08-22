@@ -1,0 +1,32 @@
+<routes>
+    <vType id="car"
+   			vClass="passenger" length="5" accel="3.5" decel="2.2"
+   			sigma="1.0" maxSpeed="10"/>
+
+    <vType id="motorcycle"
+   			vClass="motorcycle" length="3" accel="3.8" decel="2.5" guiShape="motorcycle"
+   			sigma="1.0" maxSpeed="10"/>
+    
+    <vType id="truck"
+   			vClass="truck" length="6" accel="2.5" decel="2.2" guiShape="truck"
+   			sigma="1.0" maxSpeed="7"/>
+
+   <vType id="ev"
+      		vClass="emergency" length="7" accel="5.5" decel="2.2" sigma="1.0"
+      		maxSpeed="20" guiShape="emergency" speedFactor="2.0"
+      		minGapLat="0.2"/>
+    
+    <vType id="bus"
+   			vClass="bus" length="8" accel="3.5" decel="2.2" guiShape="bus"
+   			sigma="1.0" maxSpeed="9"/>
+
+    <interval begin="0" end="5000">
+        <flow id="car" from="-E25" to="E21" via="E18" number="1000"/>
+        <flow id="truck" from="-E21" to="E25" via="-E12" number="580"/>
+        <flow id="bus" from="-E25" to="E21" via="E18" number="700"/>
+        <flow id="ev" from="-E21" to="E25" via="-E12" number="100"/>
+        <flow id="motorcycle" from="-E25" to="E21" via="-E12" number="900"/>
+    </interval>
+
+
+</routes>
