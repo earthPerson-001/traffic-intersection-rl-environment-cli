@@ -1,5 +1,6 @@
 from cmath import sqrt
 from functools import reduce
+from operator import indexOf
 from sys import maxunicode
 from time import time
 import gym
@@ -14,7 +15,7 @@ There will be 4 lanes for choosing traffic lights
 '''
 
 TOTAL_NUMBER_OF_LANES = 16
-NUMBER_OF_LANES_TO_OBSERVE = TOTAL_NUMBER_OF_LANES/2 # the lane number is in anticlockwise order skipping one lane
+NUMBER_OF_LANES_TO_OBSERVE = TOTAL_NUMBER_OF_LANES/2 
 LANES_CAPACITY = [100, 75, 80, 88, 73, 87, 78, 91]  # capacity of the corresponding lane
 PROBABILITY_OF_VEHICLE_OCCURANCE_IN_LANES_PER_SECOND = [0.15, 0.25, 0.22, 0.5, 0.8, 0.86, 0.77, 0.67]
 
@@ -174,18 +175,17 @@ class TrafficIntersectionEnvDoubleLane(gym.Env):
         self.observation_space = gym.spaces.Box(low=0, high=1000, shape=(int(NUMBER_OF_LANES_TO_OBSERVE), ), dtype=numpy.float64)
 
         # keeping track of the reward
-        # self.collected_reward = -1
+        self.collected_reward = -1
 
         self.lanes = numpy.zeros(int(NUMBER_OF_LANES_TO_OBSERVE))
 
-        # Resetting our environment, rather resetting it
+        # Resetting our environment, rather initializing it
         self.reset()
 
         
     def step(self, action):
         '''
         The possible action is to change the traffic light configuration.
-        If configuration is set to the same one, yellow light won't turn on. 
         '''
 
         done = False
@@ -203,7 +203,7 @@ class TrafficIntersectionEnvDoubleLane(gym.Env):
             self.reset()
         
         reward = self.calculateReward(vehicleThroughIntersection, vehicleRemaining, last_observation_leading_to_predicted_action)
-        # self.collected_reward += reward
+        self.collected_reward += reward
 
         obs = self.lanes
         self.state = self.lanes
@@ -211,14 +211,22 @@ class TrafficIntersectionEnvDoubleLane(gym.Env):
         if done==True:
             self.reset()
 
-        return obs, reward, done, info
+        '''
+        For cumulative reward return self.collected_reward
+        else return reward
+        '''
+
+        # using cumulative reward for now
+
+        return obs, self.collected_reward, done, info
 
 
     def reset(self):
         for i, _ in enumerate(self.lanes):
             self.lanes[i] = random.randint(int(0.3 * LANES_CAPACITY[i]), LANES_CAPACITY[i])
 
-        # self.collected_reward = -1
+        self.collected_reward = -1
+
         self.state = self.lanes
 
         self.remaining_time = ONE_TRAINING_TIME
@@ -268,9 +276,9 @@ class TrafficIntersectionEnvDoubleLane(gym.Env):
         
         no_of_vehicle_to_remove_in_each_lanes = numpy.zeros(len(self.lanes))
         lane_arrays = [first_lanes_to_subtract_certain_percentage_traffic, second_lanes_to_subtract_certain_percentage_traffic]
-        for j in range(len(lane_arrays)):
-            for i in range(len(lane_arrays[j])):
-                no_of_vehicle_to_remove_in_each_lanes[lane_arrays[j][i]] = percentage_to_subtract[j] * self.lanes[lane_arrays[j][i]]
+        for lane_array in lane_arrays:
+            for lane in lane_array:
+                no_of_vehicle_to_remove_in_each_lanes[lane] = percentage_to_subtract[indexOf(lane_arrays, lane_array)] * self.lanes[lane]
 
         speed_of_vehicle_removal_in_each_lane = numpy.zeros(len(no_of_vehicle_to_remove_in_each_lanes))
         for i in range(len(speed_of_vehicle_removal_in_each_lane)):
