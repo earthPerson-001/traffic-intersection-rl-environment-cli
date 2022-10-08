@@ -2,15 +2,17 @@ from genericpath import exists
 import random
 import os
 
-def generate_routefile(routefile=None):
+from pathlib import Path
 
-    if(routefile == None):
-        routefilePath = os.getcwd() + "/sumo-files/"
+def generate_routefile(routefilePath: str=None) -> str:
+
+    if(routefilePath == None):
+        routefilePath = Path(os.getcwd() + "/sumo-files/").resolve()
 
         if not exists(routefilePath):
             os.mkdir(routefilePath)
         
-        routefile = routefilePath + "random-route.rou.xml"
+    routefile = Path(str(routefilePath) + "/random-route.rou.xml").resolve()
 
     # random.seed(42)  # make tests reproducible
     N = 5000  # number of time steps
@@ -29,7 +31,7 @@ def generate_routefile(routefile=None):
     pSN = 1. / 7
     pSE = 1. / 11
 
-    with open(routefile, "w") as routes:
+    with open(str(routefile), "w") as routes:
         print("""<routes>
         <vType id="typeWN" accel="0.8" decel="4.5" sigma="0.5" length="5" minGap="2.5" maxSpeed="16.67" guiShape="passenger"/>
         <vType id="typeWE" accel="0.8" decel="4.5" sigma="0.5" length="5" minGap="3" maxSpeed="16.67" guiShape="passenger"/>

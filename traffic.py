@@ -5,13 +5,25 @@ from genericpath import exists
 import os
 import sys
 import optparse
-from time import sleep
-
+from pathlib import Path
 from generateRouteFile import generate_routefile
 
+FILE = Path(__file__).resolve()
+ROOT = FILE.parents[0]  # traffic-intersection-rl-environment-cli root directory
+if str(ROOT) not in sys.path:
+    sys.path.append(str(ROOT))  # add ROOT to PATH
+ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
+
 TRAFFIC_INTERSECTION_TYPE="double"
-TOTAL_TIMESTEPS=5000
+TOTAL_TIMESTEPS=50000
 GENERATE_CUSTOM_ROUTE=True
+time_to_teleport="-1"       # setting time to teleport to -1 will make vehicles not teleport
+
+# sumo stuffs
+SUMO_DIRECTORY= Path(str(ROOT) + "/sumo-files").resolve()
+net_file=Path(str(SUMO_DIRECTORY) + "/small-map-{}-lane.net.xml".format(TRAFFIC_INTERSECTION_TYPE)).resolve()
+route_file=Path(str(SUMO_DIRECTORY) + "/small-map-{}-lane.rou.xml".format(TRAFFIC_INTERSECTION_TYPE)).resolve()
+sumocfg_file=Path(str(SUMO_DIRECTORY) + "/small-map-{}-lane.sumocfg".format(TRAFFIC_INTERSECTION_TYPE)).resolve()
 
 # checking for sumo_home variable and exiting if it is not found
 if 'SUMO_HOME' in os.environ:
@@ -32,7 +44,8 @@ env = gym.make('TrafficIntersectionEnv{}Lane-v1'.format(TRAFFIC_INTERSECTION_TYP
 
 # Here, formatting is done as to create error if wrong model is selected
 # as, there won't be same model trained at exact same time and upto same timesteps
-model = PPO.load("/home/bishal/Programming/reinforcement-learning-env-cli/models/2022-08-18 19:02:03.388610-TrafficIntersection-{}Lane-ppo-1000000".format(TRAFFIC_INTERSECTION_TYPE.capitalize()))
+models = Path(str(ROOT) + "/models").resolve()
+model = PPO.load(Path(str(models) + "/2022-10-08 14:55:51.640820-TrafficIntersection-{}Lane-ppo-150000".format(TRAFFIC_INTERSECTION_TYPE.capitalize())).resolve())
 
 def run():
     step = 0
@@ -48,8 +61,6 @@ def run():
             traci.simulationStep()
             step += 1
             continue
-
-        sleep(0.08)
 
         # Selection traffic configuration once every 30 timesteps
         
@@ -103,10 +114,6 @@ def run():
                 if next_configuration == current_state / 2: # dividing by 2 as green phases is 0, 2, 4, 6
                     traci.trafficlight.setPhase(junction_with_lights, current_state)
                     
-                    for id in traci.route.getIDList():
-                        print(traci.route.getEdges(id))
-                        print("\n")
-                    
                 else:
                     # Trying to turn on yellow light
                     # This doesn't work for now, we need to figure out a way to send the next traffic light configuration after turning on yellow light
@@ -137,27 +144,18 @@ if __name__ == "__main__":
     else:
         sumoBinary = sumolib.checkBinary('sumo-gui')
 
-    current_directory = os.getcwd()
-    sumo_files_directory = current_directory + file_separator + "sumo-files" + file_separator
-
-    if not exists(sumo_files_directory):
-        sys.exit("Couldn't find sumo files directory, please place it in proper place.")
-    
-
     # Generating custom route file
     if GENERATE_CUSTOM_ROUTE and TRAFFIC_INTERSECTION_TYPE == "double":
-        route_file = generate_routefile()
-    else:
-        route_file = "{}small-map-{}-lane.rou.xml".format(sumo_files_directory, TRAFFIC_INTERSECTION_TYPE)
+        route_file = generate_routefile(routefilePath=route_file.parents[0])
 
     # this is the normal way of using traci. sumo is started as a
     # subprocess and then the python script connects and runs
     traci.start([sumoBinary, 
-    "-c", "{}small-map-{}-lane.sumocfg".format(sumo_files_directory, TRAFFIC_INTERSECTION_TYPE),
-    "-n", "{}small-map-{}-lane.net.xml".format(sumo_files_directory, TRAFFIC_INTERSECTION_TYPE),
+    "-c", sumocfg_file,
+    "-n", net_file,
     "-r", route_file,
     '--start', '--quit-on-end',
-    "--time-to-teleport", "-1"])
+    "--time-to-teleport", time_to_teleport])
 
     run()
 
