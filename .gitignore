@@ -162,9 +162,13 @@ cython_debug/
 # local ones
 bin/
 pyvenv.cfg
-custom_gym/buil
+custom_gym/builds
+share
 
 logs/*
 models/*
 
 .vscode
+
+# random-route file
+sumo-files/random-route.rou.xml
